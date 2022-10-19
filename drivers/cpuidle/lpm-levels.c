@@ -1777,16 +1777,16 @@ static int lpm_probe(struct platform_device *pdev)
 	struct hrtimer *cpu_histtimer;
 	struct kobject *module_kobj = NULL;
 #ifdef CONFIG_DRM_PANEL
-	struct drm_panel *active_panel = goodix_get_panel();
+	struct drm_panel *active_panel = NULL;
 
-	if (!active_panel)
-		return -EPROBE_DEFER;
-
-	ret = drm_panel_notifier_register(active_panel, &drm_notifier);
-	if (ret)
-		pr_err("Failed to register drm panel notifier: %d\n", ret);
-	else
-		pr_info("Registered drm panel notifier\n");
+	/* goodix_get_panel() not available - skip DRM notifier registration */
+	if (active_panel) {
+		ret = drm_panel_notifier_register(active_panel, &drm_notifier);
+		if (ret)
+			pr_err("Failed to register drm panel notifier: %d\n", ret);
+		else
+			pr_info("Registered drm panel notifier\n");
+	}
 #endif
 
 	get_online_cpus();
