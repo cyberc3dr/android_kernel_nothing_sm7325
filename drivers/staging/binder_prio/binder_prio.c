@@ -17,6 +17,7 @@ module_param(debug, uint, 0644);
 
 static const char *task_name[] = {
 	"com.miui.home",
+	"droid.launcher3",  // com.android.launcher3
 	"ndroid.systemui",  // com.android.systemui
 	// "surfaceflinger",
 	"cameraserver",
