@@ -46,15 +46,16 @@ static int to_userspace_prio(int policy, int kernel_priority) {
 	if (fair_policy(policy))
 		return PRIO_TO_NICE(kernel_priority);
 	else
-		return MAX_USER_RT_PRIO - 1 - kernel_priority;
+		return MAX_RT_PRIO - 1 - kernel_priority;
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION_5_4_0 && LINUX_VERSION_CODE < KERNEL_VERSION_5_10_0
 static void set_binder_task_priority(struct task_struct *task, int policy, int priority) {
+	int ret;
 	struct sched_param param;
 	param.sched_priority = to_userspace_prio(policy, priority);
 
-	int ret = sched_setscheduler_nocheck(task, policy | SCHED_RESET_ON_FORK, &param);
+	ret = sched_setscheduler_nocheck(task, policy | SCHED_RESET_ON_FORK, &param);
 	if (ret < 0) {
 		printk(KERN_ERR "binder_prio: Failed to set priority for task %s (%d): %d\n", task->comm, task->pid, ret);
 	}
@@ -152,14 +153,14 @@ static void extend_surfacefinger_binder_set_priority_handler(void *data, struct 
 static void extend_surfacefinger_binder_trans_handler_54(struct binder_proc *target_proc,
     struct binder_proc *proc, struct binder_thread *thread, struct binder_transaction_data *tr) {
 
-    struct sched_param params; // Declare params here
-    int ret; // Declare ret here
+    struct sched_param params;
+    int ret;
 
     if (target_proc && target_proc->tsk && strncmp(target_proc->tsk->comm, "surfaceflinger",
         strlen("surfaceflinger")) == 0) {
         // Try to set surfaceflinger priority directly (coarse-grained approach)
 
-        params.sched_priority = 98; // Example priority
+        params.sched_priority = 98; // priority 98 is good max is 99
 
         ret = sched_setscheduler_nocheck(target_proc->tsk, SCHED_FIFO | SCHED_RESET_ON_FORK, &params);
         if(ret){
