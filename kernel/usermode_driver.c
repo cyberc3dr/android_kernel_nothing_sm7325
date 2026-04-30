@@ -222,4 +222,5 @@ out:
 	if (info->cleanup)
 		info->cleanup(info);
 }
+EXPORT_SYMBOL(__exit_umh);
 
